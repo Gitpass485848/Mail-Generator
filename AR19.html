@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR19 Email Generator</title>
+    <style>
+        /* Integrating the provided style */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Styling for the form container */
+        form {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        /* Label and input field styling */
+        label {
+            display: inline-block;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        input, select, button {
+            margin-bottom: 20px;
+            padding: 5px;
+            width: 300px;
+        }
+
+        /* Styling for the button */
+        button {
+            margin-top: 10px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+        }
+
+        /* Button hover effect */
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Pre-formatted email style */
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* For centering the headings */
+        h1, h2 {
+            text-align: center;
+        }
+
+        /* For the copy button */
+        #copyButton {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #copyButton:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>AR19 Email Generator</h1>
+
+    <form id="emailForm">
+        <label for="arNumber">AR Number:</label>
+        <input type="text" id="arNumber" required><br>
+
+        <label for="arName">AR Name:</label>
+        <input type="text" id="arName" required><br>
+
+        <label for="costCenter">Cost Center:</label>
+        <input type="text" id="costCenter" required><br>
+
+        <label for="paymentType">Payment Type:</label>
+        <select id="paymentType" onchange="toggleCheckFields()" required>
+            <option value="ACH">ACH</option>
+            <option value="CHECK">CHECK</option>
+        </select><br>
+
+        <div id="checkFields" style="display: none;">
+            <label for="checkNumber">Check Number:</label>
+            <input type="text" id="checkNumber"><br>
+        </div>
+
+        <label for="payer">Payer:</label>
+        <input type="text" id="payer" required><br>
+
+        <label for="date">Date (YYYY-MM-DD):</label>
+        <input type="date" id="date" required><br>
+
+        <label for="achAmount">ACH/Check Amount:</label>
+        <input type="number" step="0.01" id="achAmount" required><br>
+
+        <label for="invoiceNumber">Invoice Number:</label>
+        <input type="text" id="invoiceNumber" required><br>
+
+        <label for="invoiceAmount">Invoice Amount:</label>
+        <input type="number" step="0.01" id="invoiceAmount" required><br>
+
+        <label for="remittanceAmount">Remittance Amount:</label>
+        <input type="number" step="0.01" id="remittanceAmount" oninput="calculateOverpayment()" required><br>
+
+        <label for="overpayment">Overpaid Amount:</label>
+        <input type="number" step="0.01" id="overpayment" readonly><br>
+
+        <button type="button" onclick="generateEmail()">Generate Email</button>
+        <h2>Generated Email:</h2>
+    <textarea id="generatedEmail" readonly></textarea>
+
+    </form>
+
+
+    <button id="copyButton" onclick="copyEmailToClipboard()">Copy to Clipboard</button>
+
+    <script>
+        // Function to toggle check number visibility
+        function toggleCheckFields() {
+            const paymentType = document.getElementById('paymentType').value;
+            document.getElementById('checkFields').style.display = paymentType === 'CHECK' ? 'block' : 'none';
+        }
+
+        // Function to calculate the overpayment
+        function calculateOverpayment() {
+            const invoiceAmount = parseFloat(document.getElementById('invoiceAmount').value) || 0;
+            const remittanceAmount = parseFloat(document.getElementById('remittanceAmount').value) || 0;
+            const overpayment = (remittanceAmount - invoiceAmount).toFixed(2);
+            document.getElementById('overpayment').value = overpayment > 0 ? overpayment : 0;
+        }
+
+        // Function to calculate due date (7 days from provided date)
+        function calculateDueDate(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 7);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+
+        // Determine approval level based on overpayment
+        function getApprovalLevel(overpayment) {
+            if (overpayment < 750) return 'GM approval';
+            if (overpayment <= 24999) return 'DM approval';
+            return "Finance Director's approval";
+        }
+
+        // Function to generate the email content
+        function generateEmail() {
+            const arNumber = document.getElementById('arNumber').value;
+            const arName = document.getElementById('arName').value;
+            const costCenter = document.getElementById('costCenter').value;
+            const paymentType = document.getElementById('paymentType').value;
+            const checkNumber = document.getElementById('checkNumber').value || 'N/A';
+            const payer = document.getElementById('payer').value;
+            const date = document.getElementById('date').value;
+            const achAmount = parseFloat(document.getElementById('achAmount').value).toFixed(2);
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const invoiceAmount = parseFloat(document.getElementById('invoiceAmount').value).toFixed(2);
+            const remittanceAmount = parseFloat(document.getElementById('remittanceAmount').value).toFixed(2);
+            const overpayment = parseFloat(document.getElementById('overpayment').value).toFixed(2);
+            const approvalLevel = getApprovalLevel(overpayment);
+
+            const responseDate = calculateDueDate(date);
+
+            const emailContent = `
+A/R# ${arNumber}, ${arName}, Unit# ${costCenter}
+
+Hello,
+Accounts Receivable received the attached ${paymentType} resulting in an overpayment on the account for $${overpayment}.
+
+PAYER: ${payer}
+${paymentType === 'CHECK' ? `CHECK: ${checkNumber}` : ''}
+${paymentType === 'CHECK' ? 'CHECK' : 'ACH'} DATE: ${date}
+${paymentType === 'CHECK' ? 'CHECK' : 'ACH'} AMOUNT: $${achAmount}
+
+• REASON FOR OVERPAYMENT: Invoice ${invoiceNumber} was billed for $${invoiceAmount} but the client paid $${remittanceAmount}, resulting in an overpayment of $${overpayment}.
+
+Options to resolve Overpayment:
+1. If there is "right to offset" language in the contract, or written client approval, the payment can be applied to open receivables.
+
+2. A/R can issue a refund check back to the client for $${overpayment} with ${approvalLevel}.
+   Please Note: We will also need the complete client name and address to make the check out to.
+
+Please respond by ${responseDate}.
+
+Thanks & regards,
+Akshay Nayak.
+            `;
+
+            document.getElementById('generatedEmail').textContent = emailContent;
+        }
+
+        // Function to copy the email content to the clipboard
+        function copyEmailToClipboard() {
+            const emailText = document.getElementById('generatedEmail').textContent;
+            navigator.clipboard.writeText(emailText).then(() => {
+                alert('Email copied to clipboard!');
+            }, (err) => {
+                alert('Failed to copy email: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>

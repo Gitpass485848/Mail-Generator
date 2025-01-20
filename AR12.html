@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR12 Email Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 20px;
+            font-size: 24px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            padding: 20px;
+            width: 100%;
+            max-width: 980px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .half-width {
+            grid-column: span 1;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            border: none;
+            padding: 12px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            resize: none;
+            height: 160px;
+            margin-top: 5px;
+        }
+
+        .actions-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .copy-button {
+            background-color: #1E90FF;
+            width: 48%;
+        }
+
+        .submit-button {
+            background-color: #4CAF50;
+            width: 48%;
+        }
+
+        .form-container input,
+        .form-container select,
+        .form-container button,
+        .form-container textarea {
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-container {
+                flex-direction: column;
+            }
+
+            .copy-button,
+            .submit-button {
+                width: 100%;
+            }
+
+            .form-container textarea {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AR12 Email Generator</h1>
+
+    <div class="form-container">
+        <form id="emailForm">
+            <div class="half-width">
+                <label for="arNumber">AR Number:</label>
+                <input type="text" id="arNumber" required>
+            </div>
+
+            <div class="half-width">
+                <label for="arName">AR Name:</label>
+                <input type="text" id="arName" required>
+            </div>
+
+            <div class="half-width">
+                <label for="cc">Cost Center:</label>
+                <input type="text" id="cc" required>
+            </div>
+
+            <div class="half-width">
+                <label for="unidentifiedPayment">Unidentified Payment ($):</label>
+                <input type="number" step="0.01" id="unidentifiedPayment" required>
+            </div>
+
+            <div class="half-width">
+                <label for="payer">Payer:</label>
+                <input type="text" id="payer" required>
+            </div>
+
+            <div class="half-width">
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <div class="half-width">
+                <label for="achAmount">ACH Amount ($):</label>
+                <input type="number" step="0.01" id="achAmount" required>
+            </div>
+
+            <div class="half-width">
+                <label for="paymentType">Payment Type:</label>
+                <select id="paymentType" onchange="toggleCheckFields()" required>
+                    <option value="ACH">ACH</option>
+                    <option value="CHECK">CHECK</option>
+                </select>
+            </div>
+
+            <div class="half-width" id="checkFields" style="display: none;">
+                <label for="checkNumber">Check Number:</label>
+                <input type="text" id="checkNumber">
+            </div>
+
+            <textarea id="generatedEmail" class="full-width" readonly></textarea>
+
+            <div class="actions-container">
+                <button type="button" onclick="generateEmail()" class="submit-button">Generate Email</button>
+                <button type="button" onclick="copyEmail()" class="copy-button">Copy Email</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleCheckFields() {
+            const paymentType = document.getElementById('paymentType').value;
+            document.getElementById('checkFields').style.display = paymentType === 'CHECK' ? 'block' : 'none';
+        }
+
+        function calculateResponseDate(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + 7); // Add 7 days to the given date
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+
+        function generateEmail() {
+            const arNumber = document.getElementById('arNumber').value;
+            const arName = document.getElementById('arName').value;
+            const cc = document.getElementById('cc').value;
+            const unidentifiedPayment = parseFloat(document.getElementById('unidentifiedPayment').value).toFixed(2);
+            const payer = document.getElementById('payer').value;
+            const date = document.getElementById('date').value;
+            const achAmount = parseFloat(document.getElementById('achAmount').value).toFixed(2);
+            const paymentType = document.getElementById('paymentType').value;
+            const checkNumber = document.getElementById('checkNumber').value || 'N/A';
+
+            const responseDate = calculateResponseDate(date);
+
+            let emailContent = `
+A/R# ${arNumber}, ${arName}, Unit# ${cc}
+
+Hello,
+Accounts Receivable received attached ${paymentType} referencing an unidentified payment of $${unidentifiedPayment}.
+
+PAYER: ${payer}
+${paymentType === 'CHECK' ? `CHECK: ${checkNumber}` : ''}
+${paymentType === 'CHECK' ? 'CHECK' : 'ACH'} DATE: ${date}
+${paymentType === 'CHECK' ? 'CHECK' : 'ACH'} AMOUNT: $${achAmount}
+
+REASON FOR UNIDENTIFIED PAYMENT: There is no invoice in the system for this amount. Could you please provide the invoice number or Cost Center and G/L Account number to book this payment to.
+
+Please respond by ${responseDate}.
+
+Thanks & regards,
+Akshay Nayak.
+            `;
+
+            document.getElementById('generatedEmail').value = emailContent.trim();
+        }
+
+        function copyEmail() {
+            const emailContent = document.getElementById('generatedEmail');
+            emailContent.select();
+            document.execCommand('copy');
+            alert("Email content copied to clipboard!");
+        }
+    </script>
+
+</body>
+</html>
