@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR13 Duplicate Payment Email Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, button, textarea {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #generatedEmail {
+            border: 1px solid #ccc;
+            padding: 15px; /* Add padding for readability */
+            margin-bottom: 20px;
+            width: 100%;
+            height: 250px; /* Increased height for better content display */
+            font-family: monospace;
+            font-size: 14px; /* Slightly increase font size */
+            overflow-y: auto; /* Ensure smooth scrolling for overflow content */
+             white-space: pre-wrap; /* Preserve line breaks and spacing */
+        }
+        #copyButton {
+            width: auto;
+            padding: 10px 20px;
+            text-align: center;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+        }
+        #copyButton:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>AR13 Email Generator</h1>
+
+    <form id="emailForm">
+        <div class="section">
+            <label for="arNumber">AR Number:</label>
+            <input type="text" id="arNumber" required>
+
+            <label for="arName">AR Name:</label>
+            <input type="text" id="arName" required>
+
+            <label for="costCenter">Cost Center:</label>
+            <input type="text" id="costCenter" required>
+        </div>
+
+        <div class="section">
+            <h3>Original Payment Details</h3>
+            <label for="payer1">Payer:</label>
+            <input type="text" id="payer1" required>
+
+            <label for="paymentType1">Payment Type:</label>
+            <select id="paymentType1" onchange="toggleCheckFields('1')" required>
+                <option value="ACH">ACH</option>
+                <option value="CHECK">CHECK</option>
+            </select>
+
+            <div id="checkFields1" style="display: none;">
+                <label for="checkNumber1">Check Number:</label>
+                <input type="text" id="checkNumber1">
+            </div>
+
+            <label for="paymentDate1">Payment Date (YYYY-MM-DD):</label>
+            <input type="date" id="paymentDate1" required>
+
+            <label for="paymentAmount1">Payment Amount:</label>
+            <input type="number" step="0.01" id="paymentAmount1" required>
+        </div>
+
+        <div class="section">
+            <h3>Duplicate Payment Details</h3>
+            <label for="payer2">Payer:</label>
+            <input type="text" id="payer2" required>
+
+            <label for="paymentType2">Payment Type:</label>
+            <select id="paymentType2" onchange="toggleCheckFields('2')" required>
+                <option value="ACH">ACH</option>
+                <option value="CHECK">CHECK</option>
+            </select>
+
+            <div id="checkFields2" style="display: none;">
+                <label for="checkNumber2">Check Number:</label>
+                <input type="text" id="checkNumber2">
+            </div>
+
+            <label for="paymentDate2">Payment Date (YYYY-MM-DD):</label>
+            <input type="date" id="paymentDate2" required>
+
+            <label for="paymentAmount2">Payment Amount:</label>
+            <input type="number" step="0.01" id="paymentAmount2" required>
+        </div>
+
+        <div class="section">
+            <h3>Duplicate Invoice Details</h3>
+            <label for="invoiceNumber">Invoice Number:</label>
+            <input type="text" id="invoiceNumber" required>
+
+            <label for="invoiceAmount">Invoice Amount:</label>
+            <input type="number" step="0.01" id="invoiceAmount" required>
+        </div>
+
+        <button type="button" onclick="generateEmail()">Generate Email</button>
+    </form>
+
+    <h2>Generated Email:</h2>
+    <pre id="generatedEmail"></pre>
+
+    <button id="copyButton" onclick="copyToClipboard()">Copy Email to Clipboard</button>
+
+    <script>
+        function toggleCheckFields(paymentNumber) {
+            const paymentType = document.getElementById(`paymentType${paymentNumber}`).value;
+            document.getElementById(`checkFields${paymentNumber}`).style.display = paymentType === 'CHECK' ? 'block' : 'none';
+        }
+
+        function calculateRespondByDate() {
+            const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 7);
+            return currentDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function generateApprovalLevel(overpaidAmount) {
+            if (overpaidAmount < 750) return 'GM approval';
+            if (overpaidAmount <= 24999) return 'DM approval';
+            return "Finance Director's approval";
+        }
+
+        function generateEmail() {
+            const arNumber = document.getElementById('arNumber').value;
+            const arName = document.getElementById('arName').value;
+            const costCenter = document.getElementById('costCenter').value;
+            const payer1 = document.getElementById('payer1').value;
+            const paymentType1 = document.getElementById('paymentType1').value;
+            const checkNumber1 = document.getElementById('checkNumber1').value || 'N/A';
+            const paymentDate1 = document.getElementById('paymentDate1').value;
+            const paymentAmount1 = parseFloat(document.getElementById('paymentAmount1').value).toFixed(2);
+
+            const payer2 = document.getElementById('payer2').value;
+            const paymentType2 = document.getElementById('paymentType2').value;
+            const checkNumber2 = document.getElementById('checkNumber2').value || 'N/A';
+            const paymentDate2 = document.getElementById('paymentDate2').value;
+            const paymentAmount2 = parseFloat(document.getElementById('paymentAmount2').value).toFixed(2);
+
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const invoiceAmount = parseFloat(document.getElementById('invoiceAmount').value).toFixed(2);
+            const overpaidAmount = invoiceAmount;
+            const approvalLevel = generateApprovalLevel(overpaidAmount);
+            const respondByDate = calculateRespondByDate();
+
+            const emailContent = `
+A/R# ${arNumber}, ${arName}, Unit# ${costCenter}
+
+Hello,
+Accounts Receivable received attached ${paymentType1} and ${paymentType2} payments resulting in a duplicate payment on the account.
+
+1ST PAYMENT:
+PAYER: ${payer1}
+${paymentType1 === 'CHECK' ? `CHECK #: ${checkNumber1}` : ''}
+PAYMENT DATE: ${paymentDate1}
+PAYMENT AMOUNT: $${paymentAmount1}
+
+2ND PAYMENT:
+PAYER: ${payer2}
+${paymentType2 === 'CHECK' ? `CHECK #: ${checkNumber2}` : ''}
+PAYMENT DATE: ${paymentDate2}
+PAYMENT AMOUNT: $${paymentAmount2}
+
+• REASON FOR DUPLICATE PAYMENT: Invoice ${invoiceNumber} for $${invoiceAmount} referenced on both payments, resulting in a duplicate payment of $${overpaidAmount}.
+
+Options to resolve Duplicate Payment:
+1. If there is "right to offset" language in the contract, or written client approval, the payment can be applied to open receivables.
+
+2. A/R can issue a refund check back to the client for $${overpaidAmount} with ${approvalLevel}.
+   Please Note: We will also need the complete client name and address to make the check out to.
+
+Please respond by ${respondByDate}.
+
+Thanks & regards,
+[Your Name Here]
+            `;
+            document.getElementById('generatedEmail').textContent = emailContent;
+        }
+
+        function copyToClipboard() {
+            const emailContent = document.getElementById('generatedEmail').textContent;
+            navigator.clipboard.writeText(emailContent).then(() => {
+                alert('Email copied to clipboard!');
+            }).catch(err => {
+                alert('Failed to copy email: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>

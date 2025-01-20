@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Generator - AR Cases</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        header {
+            background-color: #3e4b5b;
+            color: white;
+            padding: 25px 10%;
+            text-align: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+        }
+        main {
+            padding: 40px 15%;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.6rem;
+            margin-bottom: 30px;
+            color: #3e4b5b;
+        }
+        .email-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .email-list li {
+            margin: 20px 0;
+        }
+        .email-list a {
+            text-decoration: none;
+            color: #1c3558;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            padding: 8px 16px;
+            transition: background-color 0.3s, transform 0.3s ease;
+            display: inline-block;
+        }
+        .email-list a:hover {
+            background-color: #4180d0;
+            color: white;
+            transform: scale(1.05);
+        }
+        footer {
+            background-color: #3e4b5b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1rem;
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+        footer p {
+            margin: 0;
+        }
+        footer a {
+            color: #f0f0f0;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 20px 10%;
+            }
+            main {
+                padding: 30px 10%;
+            }
+            footer {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Email Generator for AR Cases</h1>
+    </header>
+
+    <main>
+        <h2>Choose a link below to generate an email for a specific AR case:</h2>
+
+        <ul class="email-list">
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR12.html" target="_blank">AR12: Unidentified Payment on Account</a></li>
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR13.html" target="_blank">AR13: Duplicate Payment on Account</a></li>
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR18.html" target="_blank">AR18: Payment on Account - No Invoice</a></li>
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR19.html" target="_blank">AR19: Overpayment on Account</a></li>
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR39.html" target="_blank">AR39: Credit Referenced on Check</a></li>
+            <li><a href="file:///C:/Users/anayak/OneDrive%20-%20SODEXO/Documents/Html/AR48%20&%20AR68.html" target="_blank">AR48 & AR68: Payment Received for Cancelled Invoice</a></li>
+        </ul>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Sodexo Business Solutions | Akshay Nayak | <a href="mailto:Akshay.Nayak@sodexo.com">Contact Me</a></p>
+    </footer>
+
+</body>
+</html>
